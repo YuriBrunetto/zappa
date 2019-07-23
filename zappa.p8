@@ -9,7 +9,9 @@ function _init()
 		h=8,
 		x=8,
 		y=8,
-		vel=0
+		vel=0,
+		onair=false,
+		fliped=false
 	}
 end
 
@@ -17,32 +19,73 @@ function _update60()
 	player.vel=gravity*dt
 	player.y+=player.vel
 	
+	if btn(0) then
+		player.x -= 1
+	end
+	if btn(1) then
+		player.x += 1
+	end
+	if btn(2)
+	and not player.onair then
+		player.fliped=true
+		gravity=-100
+ end
+ if btn(3)
+ and not player.onair then
+  player.fliped=false
+		gravity=100
+	end
+	
 	local dx=0	
 	local dy=player.vel*dt
 	player.y+=dy
+	player.onair=false
 	
-	if collide(player) then 
+	if collide(player,"down") then 
 		dy=0
 		player.y-=((player.y+player.h+1)%8)-1
+	elseif collide(player,"up") then
+		dy=0
+		player.y+=((player.y+1)%8)-1
+	else
+		player.onair=true
 	end
 end
 
 function _draw()
 	cls(1)
 	map(0,0)
-	spr(2,player.x,player.y)
+	spr(2,player.x,player.y,
+	      player.w,player.h,
+	      false,player.fliped)
+	
 end
 -->8
 --collision
-function collide(pl)
+function collide(pl,aim)
+	local x=pl.x local y=pl.y
+	local w=pl.w local h=pl.h
+
 	local x1=0 local y1=0
 	local x2=0 local y2=0
 	
-	x1=pl.x 		   y1=pl.y+pl.h
-	x2=pl.x+pl.w y2=pl.y+pl.h
-	
-	x1/=8	y1/=8
-	x2/=8	y2/=8
+	if aim=="left" then
+   x1=x-1  y1=y
+   x2=x    y2=y+h-1
+ elseif aim=="right" then
+   x1=x+w-1    y1=y
+   x2=x+w  y2=y+h-1
+ elseif aim=="up" then
+   x1=x+2    y1=y-1
+   x2=x+w-3  y2=y
+ elseif aim=="down" then
+   x1=x+2      y1=y+h
+   x2=x+w-3    y2=y+h
+ end
+
+ --pixels to tiles
+ x1/=8    y1/=8
+ x2/=8    y2/=8
 	
 	if fget(mget(x1,y1),0)
 	or fget(mget(x1,y2),0)
