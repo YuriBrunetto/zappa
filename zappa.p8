@@ -9,7 +9,9 @@ function _init()
 		h=8,
 		x=8,
 		y=8,
-		vel=0,
+		dir=0,
+		acc=20,
+		fric=10,
 		onair=false,
 		flipped=false
 	}
@@ -18,18 +20,40 @@ end
 function _update60()
 	_input()
 	
-	local dy = gravity * dt
+	-- up and down
+	local dy=gravity*dt
 	if dy > 0 then
-	 if collide(player, "down") then
-	  dy=0
+	 if collide(player,"down") then
+	  dy = 0
 	 end
 	end
 	if dy < 0 then
-	 if collide(player, "up") then
-	  dy=0
+	 if collide(player,"up") then
+	  dy = 0
 	 end
 	end
 	
+	if dy != 0 then
+		player.onair=true
+	else
+		player.onair=false
+	end
+		
+	-- left and right
+	local dx = player.dir * player.acc
+	if dx > 0 then
+	 if collide(player,"right") then
+	  dx = 0
+	 end
+	end
+	if dx < 0 then
+	 if collide(player,"left") then
+	  dx = 0
+	 end
+	end
+	
+	-- final position update
+	-- player.x+=dx
 	player.y+=dy
 		
 end
@@ -43,10 +67,13 @@ end
 
 function _input()
 	if btn(0) then
-	 player.x -= 1
+		player.dir = -1
 	end
 	if btn(1) then
-		player.x += 1
+		player.dir = 1
+	end
+	if not (btn(0) and btn(1)) then
+		player.dir = 0
 	end
 	if btn(2)
 	and not player.onair then
@@ -134,4 +161,3 @@ __sfx__
 001000000073000700007300070000730007000073000700007300270000730007000073000700007300070000730007000073000700007300070000730007000073000700007300070000730007000073000700
 __music__
 03 02030405
-
